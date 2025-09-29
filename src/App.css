@@ -1,0 +1,405 @@
+.dashboard h1 {
+  color: #1a237e;
+  font-size: 2.2rem;
+  font-weight: 900;
+  margin-bottom: 2rem;
+  letter-spacing: 1px;
+}
+.vessel-comparison-table.four-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 0.3rem 1.2rem;
+    background: #fff;
+    border-radius: 8px;
+    padding: 0.7rem 0.2rem;
+    margin-bottom: 0.5rem;
+}
+.slider-section {
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.slider-label {
+  font-weight: 500;
+  color: #2a4d8f;
+}
+.slider-value {
+  font-weight: 700;
+  color: #646cff;
+  margin-left: 0.5rem;
+}
+.slider-input {
+  width: 200px;
+}
+.vessel-comparison-header {
+  font-weight: 600;
+  color: #646cff;
+  background: #e0e7ff;
+  border-radius: 6px;
+  padding: 0.4rem 0.2rem;
+  display: contents;
+}
+.vessel-comparison-row {
+  padding: 0.2rem 0;
+  border-bottom: 1px solid #e5e7eb;
+    font-size: 1.18rem;
+    font-weight: 700;
+    color: #111;
+  display: contents;
+}
+.vessel-comparison-row .vessel-label {
+  font-weight: 500;
+  color: #222;
+}
+.vessel-comparison-row .diff-field {
+  font-weight: 700;
+  color: #b91c1c;
+}
+.vessel-comparison-row .diff {
+  background: #ffe4e6;
+  color: #b91c1c;
+  border-radius: 4px;
+  padding: 0.1rem 0.3rem;
+  font-weight: 600;
+}
+.vessel-comparison-row .no-diff {
+  color: #aaa;
+}
+.vessel-comparison {
+  background: #f6f8fa;
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+  margin-bottom: 2rem;
+  padding: 1.2rem;
+  box-shadow: 0 1px 6px rgba(100,108,255,0.07);
+}
+.vessel-comparison-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 0.7rem;
+}
+.vessel-comparison-table {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.3rem 1.2rem;
+}
+.vessel-comparison-header {
+  font-weight: 600;
+  color: #646cff;
+  background: #e0e7ff;
+  border-radius: 6px;
+  padding: 0.4rem 0.2rem;
+  display: contents;
+}
+.vessel-comparison-row {
+  padding: 0.2rem 0;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 1rem;
+  display: contents;
+}
+.vessel-comparison-row .vessel-label {
+  font-weight: 800;
+  color: #111;
+  letter-spacing: 0.2px;
+}
+.vessel-comparison-row .diff {
+  background: #ffe4e6;
+  color: #b91c1c;
+  border-radius: 4px;
+  padding: 0.1rem 0.3rem;
+  font-weight: 600;
+}
+.vessel-card {
+  background: linear-gradient(90deg, #e3f0ff 0%, #f9f9f9 100%);
+  border: 1px solid #b3c6e6;
+  border-radius: 12px;
+  padding: 1.5rem 1.2rem;
+  margin-bottom: 1.5rem;
+  font-size: 1.08rem;
+  box-shadow: 0 2px 8px rgba(100,108,255,0.08);
+  color: #222;
+  font-weight: 500;
+  transition: box-shadow 0.2s, transform 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.vessel-card:hover {
+  box-shadow: 0 4px 16px rgba(100,108,255,0.18);
+  transform: translateY(-2px) scale(1.01);
+}
+.vessel-card .vessel-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #2a4d8f;
+  margin-bottom: 0.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.vessel-card .vessel-field {
+  margin-bottom: 0.1rem;
+  color: #444;
+}
+.vessel-card .vessel-label {
+  font-weight: 600;
+  color: #646cff;
+}
+.vessel-card .vessel-status {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: #e0e7ff;
+  color: #3b3b7b;
+  font-size: 0.95rem;
+  margin-left: 8px;
+}
+/* Dashboard Styles */
+
+#root {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: left;
+}
+
+.dashboard {
+  background: linear-gradient(120deg, #e3f0ff 0%, #f9f9f9 100%);
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(100,108,255,0.10);
+  padding: 2.5rem 2rem;
+  margin-top: 2rem;
+  min-height: 80vh;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.dashboard:hover {
+  box-shadow: 0 8px 32px rgba(100,108,255,0.18);
+  transform: translateY(-2px) scale(1.01);
+}
+
+.slider-section {
+  margin-bottom: 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background: #e0e7ff;
+  border-radius: 12px;
+  padding: 1.2rem 2rem;
+  box-shadow: 0 2px 8px rgba(100,108,255,0.10);
+  flex-wrap: wrap;
+}
+
+.slider-label {
+  font-weight: 600;
+  color: #2a4d8f;
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #111;
+  margin-bottom: 1rem;
+  color: #646cff;
+  margin-left: 0.5rem;
+  font-size: 1.1rem;
+}
+.slider-input {
+  width: 220px;
+  accent-color: #646cff;
+}
+
+.vessel-comparison {
+  background: #fff;
+  border: 1px solid #b3c6e6;
+  border-radius: 14px;
+  margin-bottom: 2.5rem;
+  padding: 1.5rem 1.2rem;
+  box-shadow: 0 4px 16px rgba(100,108,255,0.10);
+  transition: box-shadow 0.2s, transform 0.2s;
+  animation: fadeIn 0.7s;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.vessel-comparison-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #646cff;
+  margin-bottom: 1rem;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.vessel-comparison-table.four-cols {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr 1fr;
+  gap: 0.4rem 1.2rem;
+  background: #f6f8fa;
+  border-radius: 12px;
+  padding: 1rem 0.5rem;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 2px 8px rgba(100,108,255,0.07);
+  transition: box-shadow 0.2s;
+}
+.vessel-comparison-table.four-cols:hover {
+  box-shadow: 0 4px 16px rgba(100,108,255,0.14);
+}
+
+.vessel-comparison-row {
+  padding: 0.4rem 0;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 1.08rem;
+  display: contents;
+}
+.vessel-comparison-row .vessel-label {
+  font-weight: 500;
+  color: #3b3b7b;
+  letter-spacing: 0.2px;
+}
+.vessel-comparison-row .diff-field {
+  font-weight: 700;
+  color: #b91c1c;
+  background: linear-gradient(90deg, #ffe4e6 0%, #fff 100%);
+  border-radius: 6px;
+  padding: 0.15rem 0.4rem;
+  box-shadow: 0 1px 4px rgba(185,28,28,0.08);
+}
+.vessel-comparison-row .diff {
+  background: linear-gradient(90deg, #ffe4e6 0%, #fff 100%);
+  color: #b91c1c;
+  border-radius: 6px;
+  padding: 0.15rem 0.4rem;
+  font-weight: 700;
+  box-shadow: 0 1px 4px rgba(185,28,28,0.10);
+}
+
+.vessel-card {
+  background: linear-gradient(120deg, #e3f0ff 0%, #f9f9f9 100%);
+  border: 1px solid #b3c6e6;
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  margin-bottom: 2rem;
+  font-size: 1.12rem;
+  box-shadow: 0 2px 12px rgba(100,108,255,0.10);
+  color: #222;
+  font-weight: 500;
+  transition: box-shadow 0.2s, transform 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.vessel-card:hover {
+  box-shadow: 0 8px 32px rgba(100,108,255,0.18);
+  transform: translateY(-2px) scale(1.01);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+}
+
+.controls label {
+  font-weight: 500;
+}
+
+.controls input[type="number"] {
+  width: 60px;
+  padding: 4px;
+  font-size: 1rem;
+}
+
+.controls button {
+  padding: 8px 16px;
+  font-size: 1rem;
+  border-radius: 4px;
+  border: none;
+  background: #646cff;
+  color: #fff;
+  cursor: pointer;
+}
+.controls button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #d32f2f;
+  margin-bottom: 1rem;
+}
+
+.data-section {
+  margin-bottom: 2rem;
+}
+.data-section h2 {
+  margin-bottom: 0.5rem;
+  color: #283593;
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+.data-section pre {
+  background: #f6f8fa;
+  padding: 1rem;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  overflow-x: auto;
+}
+
+/* Responsive Styles */
+@media (max-width: 900px) {
+  #root {
+    max-width: 100%;
+    padding: 1rem;
+  }
+  .dashboard {
+    padding: 1.2rem 0.5rem;
+  }
+  .vessel-comparison-table.four-cols {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.7rem 0.7rem;
+    padding: 0.7rem 0.2rem;
+  }
+  .slider-section {
+    padding: 0.7rem 0.5rem;
+    gap: 0.7rem;
+  }
+  .vessel-card {
+    padding: 1.2rem 0.7rem;
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .vessel-comparison-table.four-cols {
+    grid-template-columns: 1fr;
+    gap: 0.5rem 0;
+    padding: 0.5rem 0.1rem;
+  }
+  .vessel-comparison-row {
+    font-size: 1rem;
+    padding: 0.2rem 0;
+  }
+  .dashboard {
+    padding: 0.5rem 0.2rem;
+    min-height: 60vh;
+  }
+  .slider-section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    padding: 0.5rem 0.2rem;
+  }
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  .vessel-card {
+    padding: 0.7rem 0.2rem;
+    margin-bottom: 0.7rem;
+    font-size: 1rem;
+  }
+}
