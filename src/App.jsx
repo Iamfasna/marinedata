@@ -1,5 +1,13 @@
 import { useState } from 'react';
+import { createClient } from '@supabase/supabase-js';
 import './App.css';
+
+// Supabase client setup
+const supabaseUrl = 'https://ynmcyukuxwglmxofhuot.supabase.co';
+const supabaseKey = import.meta.env.VITE_SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+const vesselFinderKey = import.meta.env.VITE_VESSELFINDER_KEY;
 
 function App() {
   const [samplePercent, setSamplePercent] = useState(10);
@@ -10,132 +18,45 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Demo data arrays
-  const DEMO_INTERNAL_DATA = [
-    {
-      data: {
-        uuid: "2b5ddd6e-a78c-b6b9-11b3-9925d6efbe42",
-        name: "XIANG",
-        mmsi: "413795171",
-        type: "Cargo",
-        lat: 22.960667,
-        lon: 113.50388,
-        speed: 0.1,
-        heading: 310,
-        navigation_status: "Stopped",
-        dep_port: "DONG GUAN",
-        dest_port: "LIJIANG",
-        atd_UTC: "2024-04-11T06:23:00Z",
-        eta_UTC: "2024-12-01T02:49:00Z"
-      },
-      meta: { success: true }
-    },
-    {
-      data: {
-        uuid: "2b5ddd6e-a78c-b6b9-11b3-9925d6efbe43",
-        name: "YANG",
-        mmsi: "413795172",
-        type: "Cargo",
-        lat: 23.960667,
-        lon: 114.50388,
-        speed: 1.2,
-        heading: 90,
-        navigation_status: "Underway",
-        dep_port: "NINGBO",
-        dest_port: "SHANGHAI",
-        atd_UTC: "2024-04-12T06:23:00Z",
-        eta_UTC: "2024-12-02T02:49:00Z"
-      },
-      meta: { success: true }
-    },
-    {
-      data: {
-        uuid: "2b5ddd6e-a78c-b6b9-11b3-9925d6efbe44",
-        name: "OCEANIC",
-        mmsi: "413795173",
-        type: "Tanker",
-        lat: 24.960667,
-        lon: 115.50388,
-        speed: 2.5,
-        heading: 180,
-        navigation_status: "Moored",
-        dep_port: "SHENZHEN",
-        dest_port: "HONG KONG",
-        atd_UTC: "2024-05-01T08:00:00Z",
-        eta_UTC: "2024-05-01T12:00:00Z"
-      },
-      meta: { success: true }
-    }
-  ];
-  const DEMO_EXTERNAL_DATA = [
-    {
-      data: {
-        uuid: "3c6ddd6e-a78c-b6b9-11b3-9925d6efbe42",
-        name: "XIANG",
-        mmsi: "413795171",
-        type: "Cargo",
-        lat: 22.960667,
-        lon: 113.50388,
-        speed: 0.2,
-        heading: 310,
-        navigation_status: "Stopped",
-        dep_port: "DONG GUAN",
-        dest_port: "LIJIANG",
-        atd_UTC: "2024-04-11T06:23:00Z",
-        eta_UTC: "2024-12-01T02:49:00Z"
-      },
-      meta: { success: true }
-    },
-    {
-      data: {
-        uuid: "3c6ddd6e-a78c-b6b9-11b3-9925d6efbe43",
-        name: "YANG",
-        mmsi: "413795172",
-        type: "Cargo",
-        lat: 23.960667,
-        lon: 114.50388,
-        speed: 1.2,
-        heading: 90,
-        navigation_status: "Underway",
-        dep_port: "NINGBO",
-        dest_port: "SHANGHAI",
-        atd_UTC: "2024-04-12T06:23:00Z",
-        eta_UTC: "2024-12-02T02:49:00Z"
-      },
-      meta: { success: true }
-    },
-    {
-      data: {
-        uuid: "3c6ddd6e-a78c-b6b9-11b3-9925d6efbe44",
-        name: "OCEANIC",
-        mmsi: "413795173",
-        type: "Tanker",
-        lat: 24.960667,
-        lon: 115.50388,
-        speed: 2.7,
-        heading: 180,
-        navigation_status: "Moored",
-        dep_port: "SHENZHEN",
-        dest_port: "HONG KONG",
-        atd_UTC: "2024-05-01T08:00:00Z",
-        eta_UTC: "2024-05-01T12:00:00Z"
-      },
-      meta: { success: true }
-    }
-  ];
-
-  const fetchSampledData = () => {
+  // Fetch internal data from Supabase
+  const fetchInternalData = async () => {
     setLoading(true);
     setError('');
-    // Calculate sample size based on percentage
-    const total = Math.min(DEMO_INTERNAL_DATA.length, DEMO_EXTERNAL_DATA.length);
-    const sampleSize = Math.max(1, Math.floor((samplePercent / 100) * total));
-    // Simulate sampling from demo data
-    setTimeout(() => {
-      setInternalData(DEMO_INTERNAL_DATA.slice(0, sampleSize));
-      setExternalData(DEMO_EXTERNAL_DATA.slice(0, sampleSize));
+    // Replace 'ships' with your actual table name
+    const { data, error } = await supabase
+      .from('ships')
+      .select('*');
+    if (error) {
+      setError('Error fetching internal data');
       setLoading(false);
-    }, 500);
+      return;
+    }
+    setInternalData(data || []);
+    setLoading(false);
+  };
+
+  // Fetch external data from VesselFinder
+  const fetchExternalData = async (params = {}) => {
+    setLoading(true);
+    setError('');
+    // Build query string from params
+    const query = new URLSearchParams({ userkey: vesselFinderKey, ...params }).toString();
+    const url = `https://api.vesselfinder.com/vessels?${query}`;
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('VesselFinder API error');
+      const data = await response.json();
+      setExternalData(data.vessels || data || []); // Use data.vessels if present, else data
+    } catch (err) {
+      setError('Error fetching external data');
+    }
+    setLoading(false);
+  };
+
+  // Example: Fetch both APIs when sampling
+  const fetchSampledData = async () => {
+    await fetchInternalData();
+    await fetchExternalData();
   };
 
   return (
