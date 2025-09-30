@@ -9,6 +9,17 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 const vesselFinderKey = import.meta.env.VITE_VESSELFINDER_KEY;
 
+const COMMON_FIELDS = [
+  { label: 'MMSI', internal: 'mmsi', external: 'MMSI' },
+  { label: 'Name', internal: 'name', external: 'NAME' },
+  { label: 'Latitude', internal: 'lat', external: 'LATITUDE' },
+  { label: 'Longitude', internal: 'lon', external: 'LONGITUDE' },
+  { label: 'Speed', internal: 'speed', external: 'SPEED' },
+  { label: 'Heading', internal: 'heading', external: 'HEADING' },
+  { label: 'Destination', internal: 'dest_port', external: 'DESTINATION' },
+  { label: 'ETA', internal: 'eta_UTC', external: 'ETA' }
+];
+
 function App() {
   const [samplePercent, setSamplePercent] = useState(10);
   const [startDate, setStartDate] = useState('2024-04-01');
@@ -53,66 +64,113 @@ function App() {
     setLoading(false);
   };
 
-  // Example: Fetch both APIs when sampling
-  const fetchSampledData = async () => {
-    await fetchInternalData();
-    await fetchExternalData();
+  const fetchSampledInternalData = async (sampleSize) => {
+    const { data, error } = await supabase
+      .from('ships') // Change 'ships' to your table name if needed
+      .select('*')
+      .limit(sampleSize);
+    return data || [];
+  };
+
+  const fetchSampledVesselsWithPositions = async (sampleSize, startDate, endDate) => {
+    // 1. Sample vessels
+    const { data: vessels, error: vesselError } = await supabase
+      .from('vessels')
+      .select('*')
+      .limit(sampleSize);
+    if (vesselError) return [];
+
+    // 2. For each vessel, get latest position in date range
+    const vesselWithPosition = await Promise.all(
+      vessels.map(async vessel => {
+        const { data: pos } = await supabase
+          .from('positions')
+          .select('*')
+          .eq('vessel_id', vessel.id)
+          .gte('position_time', startDate)
+          .lte('position_time', endDate)
+          .order('position_time', { ascending: false })
+          .limit(1);
+        return {
+          vessel,
+          position: pos?.[0] || null
+        };
+      })
+    );
+    return vesselWithPosition;
+  };
+
+  const fetchVesselFinderData = async (mmsi) => {
+    const url = `https://api.vesselfinder.com/vessels?userkey=${vesselFinderKey}&mmsi=${mmsi}`;
+    try {
+      const response = await fetch(url);
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data[0]?.AIS || null;
+    } catch {
+      return null;
+    }
+  };
+
+  const fetchAndCompare = async () => {
+    setLoading(true);
+    setError('');
+    // 1. Sample vessels with positions
+    const sampled = await fetchSampledVesselsWithPositions(samplePercent, startDate, endDate);
+    // 2. Fetch VesselFinder data for each MMSI
+    const externalSample = await Promise.all(
+      sampled.map(({ vessel }) => fetchVesselFinderData(vessel.mmsi))
+    );
+    // 3. Store joined internal data and external data
+    setInternalData(sampled);
+    setExternalData(externalSample);
+    setLoading(false);
   };
 
   return (
     <div className="dashboard">
-      <h1>Data Sampling Dashboard</h1>
-      <div className="slider-section">
-        <span className="slider-label">Sample Size (%):</span>
-        <input
-          type="range"
-          min={1}
-          max={100}
-          value={samplePercent}
-          onChange={e => setSamplePercent(Number(e.target.value))}
-          className="slider-input"
-        />
-        <span className="slider-value">{samplePercent}%</span>
-        <button onClick={fetchSampledData} disabled={loading} style={{ marginLeft: '16px' }}>
-          {loading ? 'Sampling...' : 'Sample Data'}
-        </button>
-        <span className="slider-label" style={{marginLeft: '2rem'}}>Date Range:</span>
-        <input
-          type="date"
-          value={startDate}
-          onChange={e => setStartDate(e.target.value)}
-          style={{marginLeft: '0.5rem', marginRight: '0.5rem'}}
-        />
-        <span>to</span>
-        <input
-          type="date"
-          value={endDate}
-          onChange={e => setEndDate(e.target.value)}
-          style={{marginLeft: '0.5rem'}}
-        />
+      <h1 style={{ textAlign: 'center', fontWeight: 900, fontSize: '2.5rem', letterSpacing: '1px', marginBottom: '2rem' }}>
+        Data Sampling Dashboard
+      </h1>
+      <div className="filter-bar" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '2.5rem', marginBottom: '2.5rem', flexWrap: 'wrap' }}>
+        <div className="date-range-controls" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <span className="date-range-label">Date Range:</span>
+          <input
+            type="date"
+            value={startDate}
+            onChange={e => setStartDate(e.target.value)}
+          />
+          <span>to</span>
+          <input
+            type="date"
+            value={endDate}
+            onChange={e => setEndDate(e.target.value)}
+          />
+        </div>
+        <div className="slider-controls" style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
+          <span className="slider-label">Sample Size (%):</span>
+          <input
+            type="range"
+            min={1}
+            max={100}
+            value={samplePercent}
+            onChange={e => setSamplePercent(Number(e.target.value))}
+            className="slider-input"
+          />
+          <span className="slider-value">{samplePercent}%</span>
+          <button onClick={fetchAndCompare} disabled={loading} style={{ marginLeft: '16px' }}>
+            {loading ? 'Sampling...' : 'Sample Data'}
+          </button>
+        </div>
       </div>
       {error && <div className="error">Error: {error}</div>}
       <div className="data-section">
-        <h2>Ship Comparison</h2>
+        <h2 style={{ textAlign: 'center', fontWeight: 800, fontSize: '1.7rem', marginBottom: '1.5rem' }}>Ship Comparison</h2>
         {(() => {
           if (internalData.length === 0 && externalData.length === 0) {
             return <div>No data</div>;
           }
           // Only show ships with at least one difference and within date range
-          const fields = [
-            { label: 'Name', key: 'name' },
-            { label: 'MMSI', key: 'mmsi' },
-            { label: 'Type', key: 'type' },
-            { label: 'Status', key: 'navigation_status' },
-            { label: 'Lat', key: 'lat' },
-            { label: 'Lon', key: 'lon' },
-            { label: 'Speed', key: 'speed' },
-            { label: 'Heading', key: 'heading' },
-            { label: 'Departure', key: 'dep_port' },
-            { label: 'Destination', key: 'dest_port' },
-            { label: 'ATD', key: 'atd_UTC' },
-            { label: 'ETA', key: 'eta_UTC' }
-          ];
           let diffCount = 0;
           // Filter by date range (ATD)
           const filteredInternal = internalData.filter(item => {
@@ -122,7 +180,7 @@ function App() {
           const rows = filteredInternal.map((internalItem, idx) => {
             const externalItem = externalData.find(e => e.data.mmsi === internalItem.data.mmsi);
             if (!externalItem) return null;
-            const hasDiff = fields.some(field => (internalItem.data[field.key] !== externalItem.data[field.key]));
+            const hasDiff = COMMON_FIELDS.some(field => (internalItem.data[field.internal] !== externalItem.data[field.external]));
             if (!hasDiff) return null;
             diffCount++;
             return (
@@ -135,12 +193,12 @@ function App() {
                     <span>Vessel Finder</span>
                     <span>Difference</span>
                   </div>
-                  {fields.map(field => {
-                    const internalValue = internalItem.data[field.key];
-                    const externalValue = externalItem ? externalItem.data[field.key] : '-';
+                  {COMMON_FIELDS.map(field => {
+                    const internalValue = internalItem.data[field.internal];
+                    const externalValue = externalItem ? externalItem.data[field.external] : '-';
                     const isDiff = internalValue !== externalValue;
                     return (
-                      <div className="vessel-comparison-row" key={field.key}>
+                      <div className="vessel-comparison-row" key={field.internal}>
                         <span className={isDiff ? 'diff-field' : 'vessel-label'}>{field.label}</span>
                         <span className={isDiff ? 'diff' : ''}>{internalValue ?? '-'}</span>
                         <span className={isDiff ? 'diff' : ''}>{externalValue ?? '-'}</span>
@@ -166,7 +224,7 @@ function App() {
 
       {/* Analytics Section */}
       <div className="data-section">
-        <h2>Analytics</h2>
+        <h2 style={{ textAlign: 'center', fontWeight: 800, fontSize: '1.7rem', marginBottom: '1.5rem' }}>Analytics</h2>
         <div style={{fontSize: '1.1rem', color: '#222', fontWeight: 600}}>
           <div>Total Ships Compared: {internalData.length}</div>
           <div>Ships in Date Range: {internalData.filter(item => {
@@ -178,10 +236,7 @@ function App() {
             if (!(atd && atd >= new Date(startDate) && atd <= new Date(endDate))) return false;
             const externalItem = externalData.find(e => e.data.mmsi === item.data.mmsi);
             if (!externalItem) return false;
-            const fields = [
-              'name','mmsi','type','navigation_status','lat','lon','speed','heading','dep_port','dest_port','atd_UTC','eta_UTC'
-            ];
-            return fields.some(field => (item.data[field] !== externalItem.data[field]));
+            return COMMON_FIELDS.some(field => (item.data[field.internal] !== externalItem.data[field.external]));
           }).length}</div>
         </div>
       </div>
